@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { motion } from 'motion/react';
 import Image from 'next/image';
 import { Menu, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase, Wine } from '@/lib/supabase';
@@ -109,12 +110,22 @@ export default function WineDetail() {
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
           
           {/* Left Column: Image */}
-          <div className="w-full lg:w-5/12 flex justify-center">
-            <div className="relative w-full max-w-md aspect-[1/2] lg:aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-b from-muted/30 to-muted/10 border border-border/50 p-8 flex items-center justify-center">
+          <motion.div 
+            className="w-full lg:w-5/12 flex justify-center"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <div className="relative w-full max-w-[280px] sm:max-w-sm lg:max-w-md aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-b from-muted/30 to-muted/10 border border-border/50 p-6 lg:p-8 flex items-center justify-center">
               {/* Decorative background blur */}
               <div className="absolute inset-0 bg-primary/5 blur-[100px] rounded-full" />
               
-              <div className="relative w-full h-full drop-shadow-2xl">
+              <motion.div 
+                className="relative w-full h-full drop-shadow-2xl"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              >
                 <Image
                   src={wine.image_url || 'https://picsum.photos/seed/wine/400/600'}
                   alt={wine.name}
@@ -123,31 +134,37 @@ export default function WineDetail() {
                   referrerPolicy="no-referrer"
                   priority
                 />
-              </div>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Column: Info */}
-          <div className="w-full lg:w-7/12 space-y-12">
+          <motion.div 
+            className="w-full lg:w-7/12 space-y-12"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+          >
             
             {/* Title & Price */}
             <div className="space-y-6">
               <div className="flex flex-wrap items-center gap-3 mb-2">
-                <div className="inline-flex items-center px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs font-semibold uppercase tracking-widest">
+                <div className="inline-flex items-center px-3 py-1 rounded-full border border-primary/50 dark:border-primary bg-primary/5 text-primary dark:text-white text-xs font-semibold uppercase tracking-widest">
                   {wine.type} • {wine.year}
                 </div>
-                {wine.is_available === false && (
-                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-destructive text-destructive-foreground text-xs font-bold uppercase tracking-widest shadow-sm">
-                    Indisponível no momento
-                  </div>
-                )}
               </div>
               <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl text-foreground leading-tight">
                 {wine.name}
               </h1>
-              <p className="text-2xl md:text-3xl font-light text-secondary">
-                {new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(wine.price)}
-              </p>
+              {wine.is_available !== false ? (
+                <p className="text-2xl md:text-3xl font-light text-primary dark:text-white">
+                  {new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(wine.price)}
+                </p>
+              ) : (
+                <p className="text-2xl md:text-3xl font-light text-primary dark:text-white uppercase tracking-widest text-lg">
+                  Indisponível
+                </p>
+              )}
               
               <div className="w-24 h-px bg-border my-8" />
               
@@ -157,19 +174,29 @@ export default function WineDetail() {
             </div>
 
             {/* Technical Grid */}
-            <div className="pt-8 border-t border-border">
-              <h3 className="font-heading text-xl uppercase tracking-widest text-foreground mb-8">
+            <motion.div 
+              className="pt-8 border-t border-border"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+            >
+              <h3 className="font-heading text-xl uppercase tracking-widest text-foreground mb-8 font-semibold">
                 Informação Técnica
               </h3>
               <TechnicalGrid wine={wine} />
-            </div>
+            </motion.div>
             
-          </div>
+          </motion.div>
         </div>
       </main>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-md border-t border-border p-4 z-40">
+      <motion.div 
+        className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-md border-t border-border p-4 z-40"
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
+      >
         <div className="container mx-auto flex justify-between items-center">
           <Button 
             variant="ghost" 
@@ -203,7 +230,7 @@ export default function WineDetail() {
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

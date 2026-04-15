@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase, Wine } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Image as ImageIcon, X, ChevronLeft, LogOut } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Pencil, Trash2, Image as ImageIcon, X, ChevronLeft, LogOut, Wine as WineIcon, Package, BarChart3 } from 'lucide-react';
+import { InventoryTab } from './components/InventoryTab';
+import { AnalyticsTab } from './components/AnalyticsTab';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -52,6 +55,18 @@ export default function AdminPage() {
   const COUNTRIES = ['Portugal', 'França', 'Itália', 'Espanha', 'Chile', 'Argentina'];
   const REGIONS = ['Douro', 'Alentejo', 'Vinho Verde', 'Dão', 'Bairrada', 'Península de Setúbal', 'Borgonha', 'Bordéus', 'Champagne'];
 
+  const fetchWines = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
+    const { data, error } = await supabase.from('wines').select('*').order('name');
+    if (error) {
+      console.error('Error fetching wines:', error);
+      setWines([]);
+    } else {
+      setWines(data || []);
+    }
+    if (showLoading) setLoading(false);
+  }, []);
+
   useEffect(() => {
     async function checkUser() {
       const { data: { session } } = await supabase.auth.getSession();
@@ -63,7 +78,7 @@ export default function AdminPage() {
       }
     }
     checkUser();
-  }, []);
+  }, [fetchWines]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -86,18 +101,6 @@ export default function AdminPage() {
       fetchWines();
       router.push('/');
     }
-  }
-
-  async function fetchWines() {
-    setLoading(true);
-    const { data, error } = await supabase.from('wines').select('*').order('name');
-    if (error) {
-      console.error('Error fetching wines:', error);
-      setWines([]);
-    } else {
-      setWines(data || []);
-    }
-    setLoading(false);
   }
 
   async function handleDeleteConfirm() {
@@ -275,15 +278,11 @@ export default function AdminPage() {
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={() => router.push('/')} className="text-muted-foreground hover:text-foreground">
               <ChevronLeft className="w-4 h-4 mr-2" />
-              Página Inicial
+              Ir para a Carta Digital
             </Button>
-            <h1 className="font-heading text-2xl md:text-3xl uppercase tracking-widest text-primary">Gestão de Vinhos</h1>
+            <h1 className="font-heading text-2xl md:text-3xl uppercase tracking-widest text-primary hidden md:block">Sistema de Gestão</h1>
           </div>
           <div className="flex gap-4 w-full md:w-auto">
-            <Button className="bg-primary hover:bg-primary/90 text-white flex-1 md:flex-none" onClick={() => openDialog()}>
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar Vinho
-            </Button>
             <Button variant="destructive" onClick={() => supabase.auth.signOut().then(() => { setIsAuthenticated(false); router.push('/'); })}>
               <LogOut className="w-4 h-4 mr-2" />
               Sair
@@ -291,10 +290,38 @@ export default function AdminPage() {
           </div>
         </div>
 
+        <Tabs defaultValue="vinhos" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted/50 p-1 rounded-xl">
+            <TabsTrigger value="vinhos" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+              <WineIcon className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Gestão de Vinhos</span>
+              <span className="sm:hidden">Vinhos</span>
+            </TabsTrigger>
+            <TabsTrigger value="stock" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+              <Package className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Controlo de Stock</span>
+              <span className="sm:hidden">Stock</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Dashboard & Análises</span>
+              <span className="sm:hidden">Análises</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="vinhos" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="font-heading text-xl uppercase tracking-widest text-primary dark:text-white">Catálogo de Vinhos</h2>
+              <Button className="bg-primary hover:bg-primary/90 text-white" onClick={() => openDialog()}>
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Vinho
+              </Button>
+            </div>
+
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-background border-border">
             <DialogHeader>
-              <DialogTitle className="font-heading text-2xl uppercase tracking-widest text-secondary">
+              <DialogTitle className="font-heading text-2xl uppercase tracking-widest text-primary dark:text-white">
                 {editingWine?.id ? 'Editar Vinho' : 'Adicionar Vinho'}
               </DialogTitle>
             </DialogHeader>
@@ -513,6 +540,7 @@ export default function AdminPage() {
                 <TableHead>Tipo</TableHead>
                 <TableHead>Ano</TableHead>
                 <TableHead>Preço</TableHead>
+                <TableHead className="text-center">Stock Físico</TableHead>
                 <TableHead className="text-center">Destaque</TableHead>
                 <TableHead className="text-center">Disponível</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
@@ -530,7 +558,8 @@ export default function AdminPage() {
                   <TableCell className="font-medium">{wine.name}</TableCell>
                   <TableCell>{wine.type}</TableCell>
                   <TableCell>{wine.year}</TableCell>
-                  <TableCell>{new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(wine.price)}</TableCell>
+                  <TableCell className="text-primary dark:text-white font-medium">{new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(wine.price)}</TableCell>
+                  <TableCell className="text-center font-bold">{wine.stock || 0}</TableCell>
                   <TableCell className="text-center">
                     {wine.is_featured ? (
                       <span className="inline-block w-3 h-3 rounded-full bg-green-500" title="Em Destaque" />
@@ -560,6 +589,16 @@ export default function AdminPage() {
             </TableBody>
           </Table>
         </div>
+          </TabsContent>
+
+          <TabsContent value="stock">
+            <InventoryTab wines={wines} fetchWines={fetchWines} />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <AnalyticsTab wines={wines} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

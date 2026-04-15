@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'motion/react';
 import { Menu, Search, SlidersHorizontal, X, Settings, LogOut, Moon, Sun } from 'lucide-react';
 import { supabase, Wine } from '@/lib/supabase';
 import { WineCard } from '@/components/wine-card';
@@ -33,15 +34,15 @@ export default function Home() {
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [regionFilter, setRegionFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('Champagne');
+  const [regionFilter, setRegionFilter] = useState<string>('Champagne');
   const [sortBy, setSortBy] = useState<string>('name_asc');
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    // Check initial theme
-    setIsDarkMode(document.documentElement.classList.contains('dark'));
-  }, []);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return document.documentElement.classList.contains('dark');
+    }
+    return false;
+  });
 
   const toggleTheme = () => {
     const newTheme = !isDarkMode;
@@ -192,8 +193,12 @@ export default function Home() {
         ) : (
           <>
             {/* Featured Section */}
-            {featuredWines.length > 0 && !searchQuery && typeFilter === 'all' && regionFilter === 'all' && (
-              <section>
+            {featuredWines.length > 0 && !searchQuery && ((typeFilter === 'all' && regionFilter === 'all') || (typeFilter === 'Champagne' && regionFilter === 'Champagne')) && (
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+              >
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="font-heading text-xl md:text-2xl text-primary dark:text-white uppercase tracking-wider">
                     Produtos em Destaque
@@ -208,11 +213,16 @@ export default function Home() {
                   className="w-full"
                 >
                   <CarouselContent className="-ml-4">
-                    {featuredWines.map((wine) => (
+                    {featuredWines.map((wine, index) => (
                       <CarouselItem key={wine.id} className="pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                        <div className="h-[450px]">
+                        <motion.div 
+                          className="h-[450px]"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.5, delay: index * 0.1 }}
+                        >
                           <WineCard wine={wine} searchParams={currentSearchParams} />
-                        </div>
+                        </motion.div>
                       </CarouselItem>
                     ))}
                   </CarouselContent>
@@ -221,11 +231,15 @@ export default function Home() {
                     <CarouselNext className="-right-12 bg-background border-border text-foreground hover:bg-primary hover:text-primary-foreground" />
                   </div>
                 </Carousel>
-              </section>
+              </motion.section>
             )}
 
             {/* Catalog Section */}
-            <section>
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+            >
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 border-t border-border pt-12">
                 <div className="flex-1 space-y-4">
                   <h2 className="font-heading text-xl md:text-2xl text-primary dark:text-white uppercase tracking-wider flex items-center gap-2">
@@ -242,7 +256,7 @@ export default function Home() {
                             {typeFilter === 'all' ? 'Tipo' : typeFilter}
                           </SelectValue>
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="text-primary dark:text-white">
                           <SelectItem value="all">Todos os Tipos</SelectItem>
                           {uniqueTypes.map(type => (
                             <SelectItem key={type} value={type}>{type}</SelectItem>
@@ -258,7 +272,7 @@ export default function Home() {
                             {regionFilter === 'all' ? 'Regiões' : regionFilter}
                           </SelectValue>
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="text-primary dark:text-white">
                           <SelectItem value="all">Todas as Regiões</SelectItem>
                           {uniqueRegions.map(region => (
                             <SelectItem key={region} value={region}>{region}</SelectItem>
@@ -283,7 +297,7 @@ export default function Home() {
                         {sortBy === 'price_desc' && 'Valor (Maior para Menor)'}
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="text-primary dark:text-white">
                       <SelectItem value="name_asc">Ordem Alfabética (A-Z)</SelectItem>
                       <SelectItem value="name_desc">Ordem Alfabética (Z-A)</SelectItem>
                       <SelectItem value="price_asc">Valor (Menor para Maior)</SelectItem>
@@ -296,13 +310,33 @@ export default function Home() {
               {/* Wine Grid or Empty State */}
               {filteredWines.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <motion.div 
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                      hidden: { opacity: 0 },
+                      visible: {
+                        opacity: 1,
+                        transition: {
+                          staggerChildren: 0.1
+                        }
+                      }
+                    }}
+                  >
                     {filteredWines.map(wine => (
-                      <div key={wine.id} className="h-[450px]">
+                      <motion.div 
+                        key={wine.id} 
+                        className="h-[450px]"
+                        variants={{
+                          hidden: { opacity: 0, y: 20 },
+                          visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+                        }}
+                      >
                         <WineCard wine={wine} searchParams={currentSearchParams} />
-                      </div>
+                      </motion.div>
                     ))}
-                  </div>
+                  </motion.div>
                   
                   {/* Load More */}
                   <div className="mt-12 flex justify-center">
@@ -314,7 +348,7 @@ export default function Home() {
               ) : (
                 <EmptyState onClear={clearFilters} />
               )}
-            </section>
+            </motion.section>
           </>
         )}
       </main>

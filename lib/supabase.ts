@@ -22,4 +22,16 @@ export type Wine = {
   image_url: string;
   is_featured: boolean;
   is_available?: boolean;
+  stock?: number;
+};
+
+export type InventoryLog = {
+  id: string;
+  created_at: string;
+  wine_id: string;
+  transaction_type: 'entrada' | 'venda' | 'perda';
+  quantity: number;
+  comment?: string;
+  user_name?: string;
+  transaction_date?: string;
 };

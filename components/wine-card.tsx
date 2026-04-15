@@ -20,16 +20,9 @@ export function WineCard({ wine, searchParams = '' }: WineCardProps) {
               src={wine.image_url || 'https://picsum.photos/seed/wine/400/600'}
               alt={wine.name}
               fill
-              className={`object-contain object-center transition-transform duration-500 p-4 ${wine.is_available !== false ? 'group-hover:scale-105' : 'opacity-70 grayscale-[0.5]'}`}
+              className="object-contain object-center group-hover:scale-105 transition-transform duration-500 p-4"
               referrerPolicy="no-referrer"
             />
-            {wine.is_available === false && (
-              <div className="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-[2px]">
-                <span className="bg-destructive text-destructive-foreground px-4 py-2 text-sm font-bold uppercase tracking-widest rounded shadow-lg transform -rotate-12">
-                  Indisponível
-                </span>
-              </div>
-            )}
             <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
               <div className="bg-background px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-widest text-primary dark:text-white border border-primary/20 dark:border-primary shadow-sm">
                 {wine.type}
@@ -47,9 +40,15 @@ export function WineCard({ wine, searchParams = '' }: WineCardProps) {
               {wine.producer} • {wine.region}
             </p>
             <div className="mt-auto flex justify-between items-center">
-              <span className="text-lg font-medium text-secondary">
-                {new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(wine.price)}
-              </span>
+              {wine.is_available !== false ? (
+                <span className="text-lg font-medium text-primary dark:text-white">
+                  {new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(wine.price)}
+                </span>
+              ) : (
+                <span className="text-sm font-semibold text-primary dark:text-white uppercase tracking-widest">
+                  Indisponível
+                </span>
+              )}
               <span className="text-xs uppercase tracking-widest text-primary dark:text-white font-semibold group-hover:bg-primary/5 px-4 py-2 rounded-full border border-transparent group-hover:border-primary/20 transition-all">
                 Ver Detalhes
               </span>
