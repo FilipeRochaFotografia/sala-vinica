@@ -31,7 +31,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Pencil, Trash2, Image as ImageIcon, X, ChevronLeft, LogOut, Wine as WineIcon, Package, BarChart3 } from 'lucide-react';
 import { InventoryTab } from './components/InventoryTab';
-import { AnalyticsTab } from './components/AnalyticsTab';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -291,7 +290,7 @@ export default function AdminPage() {
         </div>
 
         <Tabs defaultValue="vinhos" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted/50 p-1 rounded-xl">
+          <TabsList className="grid w-full grid-cols-2 mb-8 bg-muted/50 p-1 rounded-xl">
             <TabsTrigger value="vinhos" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
               <WineIcon className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Gestão de Vinhos</span>
@@ -301,11 +300,6 @@ export default function AdminPage() {
               <Package className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Controlo de Stock</span>
               <span className="sm:hidden">Stock</span>
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
-              <BarChart3 className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Dashboard & Análises</span>
-              <span className="sm:hidden">Análises</span>
             </TabsTrigger>
           </TabsList>
 
@@ -593,10 +587,6 @@ export default function AdminPage() {
 
           <TabsContent value="stock">
             <InventoryTab wines={wines} fetchWines={fetchWines} />
-          </TabsContent>
-
-          <TabsContent value="analytics">
-            <AnalyticsTab wines={wines} />
           </TabsContent>
         </Tabs>
       </div>
