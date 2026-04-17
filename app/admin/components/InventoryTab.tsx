@@ -213,7 +213,7 @@ export function InventoryTab({ wines, fetchWines }: { wines: Wine[], fetchWines:
         <Card className="bg-card border-border">
           <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Garrafas Vendidas</CardTitle>
-            <Select value={salesFilter} onValueChange={setSalesFilter}>
+<Select value={salesFilter} onValueChange={(val) => setSalesFilter(val as string)}>
               <SelectTrigger className="w-[160px] h-8 text-xs bg-background">
                 <SelectValue />
               </SelectTrigger>
